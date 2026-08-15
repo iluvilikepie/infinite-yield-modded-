@@ -2358,6 +2358,7 @@ eventEditor = (function()
 		{52,"TextButton",{BackgroundColor3=currentShade1,BorderSizePixel=0,Font=3,Name="Settings",Parent={49},Position=UDim2.new(1,-40,0,0),Size=UDim2.new(0,20,0,20),Text="",TextColor3=Color3.new(1,1,1),TextSize=18,ZIndex=10,}},
 		{53,"ImageLabel",{BackgroundColor3=Color3.new(1,1,1),BackgroundTransparency=1,Image=getcustomasset("infiniteyield/assets/settings.png"),Parent={52},Position=UDim2.new(0,2,0,2),Size=UDim2.new(0,16,0,16),ZIndex=10,}},
 	})
+	warn("[IY DEBUG] eventEditor: main table created")
 	main.Name = randomString()
 	local mainFrame = main:WaitForChild("Content")
 	local eventList = mainFrame:WaitForChild("List")
@@ -2381,6 +2382,7 @@ eventEditor = (function()
 	table.insert(text1,settingsTemplates.Players.Me) table.insert(text1,settingsTemplates.Numbers.Title) table.insert(text1,settingsTemplates.Numbers.Any)
 	table.insert(shade3,settingsTemplates.Numbers.Any.Button) table.insert(shade3,settingsTemplates.Numbers.CustomButton) table.insert(text1,settingsTemplates.Numbers.Custom)
 	table.insert(shade2,settingsTemplates.Numbers.Custom)
+	warn("[IY DEBUG] eventEditor: table inserts done")
 
 	local tweenInf = TweenInfo.new(0.25,Enum.EasingStyle.Quart,Enum.EasingDirection.Out)
 
@@ -2755,6 +2757,7 @@ eventEditor = (function()
 	end)
 	dragGUI(main)
 	main.Parent = ScaledHolder
+	warn("[IY DEBUG] eventEditor: about to return")
 
 	return {
 		RegisterEvent = registerEvent,
