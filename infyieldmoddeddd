@@ -18,7 +18,7 @@ queueteleport =  missing("function", queue_on_teleport or (syn and syn.queue_on_
 httprequest =  missing("function", request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request))
 everyClipboard = missing("function", setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set))
 firetouchinterest = missing("function", firetouchinterest)
-waxwritefile, waxreadfile = writefile, readfile
+local waxwritefile, waxreadfile = writefile, readfile
 writefile = missing("function", waxwritefile) and function(file, data, safe)
 	if safe == true then return pcall(waxwritefile, file, data) end
 	waxwritefile(file, data)
