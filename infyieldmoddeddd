@@ -3125,6 +3125,7 @@ function saves()
 end
 
 saves()
+warn("[IY DEBUG] saves() completed")
 
 function updatesaves()
 	if nosaves == false and writefileExploit() then
@@ -4929,6 +4930,7 @@ for i = 1, #CMDs do
 end
 
 IndexContents("", true)
+warn("[IY DEBUG] CMDs list populated")
 
 function checkTT()
 	local t
@@ -13241,6 +13243,7 @@ if spawnCmds and #spawnCmds > 0 then
 end
 
 if loadedEventData then eventEditor.LoadData(loadedEventData) end
+warn("[IY DEBUG] eventEditor data loaded")
 eventEditor.Refresh()
 
 eventEditor.FireEvent("OnExecute")
@@ -13392,7 +13395,7 @@ end)
 
 task.spawn(function()
     task.wait()
-    pcall(function()
+    local ok, err = pcall(function()
         Credits:TweenPosition(UDim2.new(0, 0, 0.9, 0), "Out", "Quart", 0.2)
         Logo:TweenSizeAndPosition(UDim2.new(0, 175, 0, 175), UDim2.new(0, 37, 0, 45), "Out", "Quart", 0.3)
         task.wait(1)
@@ -13402,8 +13405,17 @@ task.spawn(function()
         Credits:TweenPosition(UDim2.new(0, 0, 0.9, 30), "Out", "Quart", 0.2)
         task.wait(0.2)
     end)
-    Logo:Destroy()
-    Credits:Destroy()
-    IntroBackground:Destroy()
-    minimizeHolder()
+    if not ok then
+        warn("[IY DEBUG] intro fade block errored: " .. tostring(err))
+    end
+    local ok2, err2 = pcall(function()
+        Logo:Destroy()
+        Credits:Destroy()
+        IntroBackground:Destroy()
+        minimizeHolder()
+    end)
+    if not ok2 then
+        warn("[IY DEBUG] final destroy block errored: " .. tostring(err2))
+    end
+    warn("[IY DEBUG] intro block finished")
 end)
