@@ -5653,7 +5653,7 @@ UserInputService.InputBegan:Connect(function(input,gameProcessed)
 	end
 end)
 
-Players.LocalPlayer.Chatted:Connect(function()
+getgenv().IY_ChattedConn = Players.LocalPlayer.Chatted:Connect(function()
 	wait()
 	if lastEnteredString then
 		local message = lastEnteredString
@@ -6227,8 +6227,8 @@ function onInputEnded(input,gameProcessed)
 	end
 end
 
-UserInputService.InputBegan:Connect(onInputBegan)
-UserInputService.InputEnded:Connect(onInputEnded)
+getgenv().IY_InputBeganConn = UserInputService.InputBegan:Connect(onInputBegan)
+getgenv().IY_InputEndedConn = UserInputService.InputEnded:Connect(onInputEnded)
 
 ClickTP.Select.MouseButton1Click:Connect(function()
 	if keySelected then
@@ -13209,7 +13209,7 @@ Players.PlayerAdded:Connect(function(plr)
 end)
 
 if not isLegacyChat then
-	TextChatService.MessageReceived:Connect(function(message)
+	getgenv().IY_MessageReceivedConn = TextChatService.MessageReceived:Connect(function(message)
 		if message.TextSource and message.Status ~= Enum.TextChatMessageStatus.InvalidTextChannelPermissions then
 			local player = Players:GetPlayerByUserId(message.TextSource.UserId)
 			if not player then return end
@@ -13272,6 +13272,12 @@ getgenv().IY_Uninject = function()
     pcall(function() if staffwatchjoin then staffwatchjoin:Disconnect() end end)
     pcall(function() selectionBox:Destroy() end)
     pcall(function() selected:Destroy() end)
+
+    pcall(function() if getgenv().IY_InputBeganConn then getgenv().IY_InputBeganConn:Disconnect() end end)
+    pcall(function() if getgenv().IY_InputEndedConn then getgenv().IY_InputEndedConn:Disconnect() end end)
+    pcall(function() if getgenv().IY_ChattedConn then getgenv().IY_ChattedConn:Disconnect() end end)
+    pcall(function() if getgenv().IY_MessageReceivedConn then getgenv().IY_MessageReceivedConn:Disconnect() end end)
+
     getgenv().IY_LOADED = false
     getgenv().IYLoaded = false
 end
