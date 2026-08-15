@@ -90,6 +90,7 @@ TextChatService = Services.TextChatService
 CaptureService = Services.CaptureService
 VoiceChatService = Services.VoiceChatService
 SocialService = Services.SocialService
+warn("[IY DEBUG] services assigned")
 
 PlayerGui = cloneref(Players.LocalPlayer:FindFirstChildWhichIsA("PlayerGui"))
 COREGUI = Services.CoreGui or PlayerGui
@@ -772,6 +773,7 @@ Credits.FontSize = Enum.FontSize.Size14
 Credits.Text = "Edge // Zwolf // Moon // Toon // Peyton // ATP"
 Credits.TextColor3 = Color3.new(1, 1, 1)
 Credits.ZIndex = 10
+warn("[IY DEBUG] main GUI block created")
 
 KeybindsFrame.Name = "KeybindsFrame"
 KeybindsFrame.Parent = Settings
@@ -2765,6 +2767,7 @@ eventEditor = (function()
 		SetOnEdited = setOnEdited
 	}
 end)()
+warn("[IY DEBUG] eventEditor IIFE finished")
 
 reference = (function()
 	local main = create({
@@ -2919,6 +2922,7 @@ reference = (function()
 		main:TweenPosition(UDim2.new(0.5,-250,0.5,-150), "InOut", "Quart", 0.5, true, nil)
 	end)
 end)()
+warn("[IY DEBUG] reference IIFE finished")
 
 currentShade1 = Color3.fromRGB(36, 36, 37)
 currentShade2 = Color3.fromRGB(46, 46, 47)
