@@ -13282,15 +13282,22 @@ getgenv().IY_Uninject = function()
     pcall(function() if staffwatchjoin then staffwatchjoin:Disconnect() end end)
     pcall(function() selectionBox:Destroy() end)
     pcall(function() selected:Destroy() end)
-
     pcall(function() if getgenv().IY_InputBeganConn then getgenv().IY_InputBeganConn:Disconnect() end end)
     pcall(function() if getgenv().IY_InputEndedConn then getgenv().IY_InputEndedConn:Disconnect() end end)
     pcall(function() if getgenv().IY_ChattedConn then getgenv().IY_ChattedConn:Disconnect() end end)
     pcall(function() if getgenv().IY_MessageReceivedConn then getgenv().IY_MessageReceivedConn:Disconnect() end end)
-
     getgenv().IY_LOADED = false
     getgenv().IYLoaded = false
 end
+
+addcmd("unload", {"uninject", "unloadiy"}, function(args, speaker)
+    if getgenv().IY_Uninject then
+        getgenv().IY_Uninject()
+        warn("[IY] Unloaded via command")
+    else
+        warn("[IY] IY_Uninject not found")
+    end
+end, "Uninjects Infinite Yield")
 
 IYMouse.Move:Connect(checkTT)
 
