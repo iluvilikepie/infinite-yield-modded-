@@ -13299,9 +13299,26 @@ addcmd("unload", {"uninject", "unloadiy"}, function(args, speaker)
     end
 end, "Uninjects Infinite Yield")
 
+do
+    local newcmd = Example:Clone()
+    newcmd.Parent = CMDsF
+    newcmd.Visible = false
+    newcmd.Text = "unload / uninject / unloadiy"
+    newcmd.Name = "CMD"
+    table.insert(text1, newcmd)
+    newcmd:SetAttribute("Title", "unload / uninject / unloadiy")
+    newcmd:SetAttribute("Desc", "Uninjects Infinite Yield")
+    newcmd.MouseButton1Down:Connect(function()
+        if not IsOnMobile and newcmd.Visible and newcmd.TextTransparency == 0 then
+            local currentText = Cmdbar.Text
+            Cmdbar:CaptureFocus()
+            autoComplete(newcmd.Text, currentText)
+            maximizeHolder()
+        end
+    end)
+    IndexContents("", true)
+end
 
-IndexContents("", true)
-CMDs[#CMDs + 1] = {NAME = 'unload / uninject / unloadiy', DESC = 'Uninjects Infinite Yield'}
 IYMouse.Move:Connect(checkTT)
 CaptureService.CaptureBegan:Connect(function()
 	PARENT.Enabled = false
