@@ -13299,6 +13299,8 @@ addcmd("unload", {"uninject", "unloadiy"}, function(args, speaker)
     end
 end, "Uninjects Infinite Yield")
 
+IndexContents("", true)
+
 IYMouse.Move:Connect(checkTT)
 
 CaptureService.CaptureBegan:Connect(function()
